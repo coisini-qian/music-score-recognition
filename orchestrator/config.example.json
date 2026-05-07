@@ -1,0 +1,9 @@
+{
+  "host": "127.0.0.1",
+  "port": 8765,
+  "work_dir": "",
+  "audiveris_command": "java -jar C:/tools/audiveris.jar -batch -export -output \"{output}\" \"{input}\"",
+  "musicxml_to_midi_command": "",
+  "pianobooster_command": "C:/music-score-recognition/PianoBooster/build/pianobooster.exe \"{midi}\"",
+  "vmpk_command": "C:/music-score-recognition/VMPK/build/vmpk.exe"
+}
