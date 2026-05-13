@@ -147,6 +147,12 @@ class AppState:
                     "pianobooster_command": bool(self.config.get("pianobooster_command")),
                     "vmpk_command": bool(self.config.get("vmpk_command")),
                 },
+                "templates": {
+                    "audiveris": str(self.config.get("audiveris_command") or ""),
+                    "converter": str(self.config.get("musicxml_to_midi_command") or ""),
+                    "pianobooster": str(self.config.get("pianobooster_command") or ""),
+                    "vmpk": str(self.config.get("vmpk_command") or ""),
+                },
                 "last_result": self.last_result,
             }
 
@@ -236,7 +242,7 @@ HTML_PAGE = """<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Music Score Recognition Hub</title>
+  <title>乐谱识别中心</title>
   <style>
     :root { color-scheme: dark; }
     body { margin: 0; font-family: Inter, Arial, sans-serif; background: #0f1115; color: #e8ecf1; }
@@ -264,54 +270,54 @@ HTML_PAGE = """<!doctype html>
 </head>
 <body>
   <div class="wrap">
-    <h1>Music Score Recognition Hub</h1>
-    <p class="muted">Capture a photo, run Audiveris, optionally convert MusicXML to MIDI, then open PianoBooster or VMPK.</p>
+    <h1>乐谱识别中心</h1>
+    <p class="muted">拍照或上传乐谱，运行 Audiveris，必要时转换为 MIDI，再打开 PianoBooster 或 VMPK。</p>
     <div class="grid">
       <div class="card">
-        <h2>Capture</h2>
+        <h2>拍照与上传</h2>
         <video id="video" autoplay playsinline></video>
         <canvas id="canvas" style="display:none;"></canvas>
         <div class="row">
-          <button id="cameraStart">Start Camera</button>
-          <button id="capture" class="secondary">Capture Frame</button>
+          <button id="cameraStart">启动摄像头</button>
+          <button id="capture" class="secondary">截取当前画面</button>
           <label class="btn secondary" style="margin:0;">
-            Upload Image
+            上传图片
             <input id="fileInput" type="file" accept="image/*" style="display:none;">
           </label>
-          <button id="run">Run Recognition</button>
+          <button id="run">开始识别</button>
         </div>
         <img id="preview" class="preview" alt="preview" style="display:none; margin-top: 12px;">
-        <div class="status" id="captureStatus">No image selected yet.</div>
+        <div class="status" id="captureStatus">还没有选择图片。</div>
       </div>
       <div class="card">
-        <h2>Commands</h2>
-        <label>Audiveris command template</label>
+        <h2>命令配置</h2>
+        <label>Audiveris 命令模板</label>
         <input id="audiverisCommand" type="text" placeholder="java -jar ... -batch -export -output \"{output}\" \"{input}\"">
-        <label>MusicXML to MIDI command template</label>
-        <input id="converterCommand" type="text" placeholder="Optional: convert {musicxml} to {midi}">
-        <label>PianoBooster command template</label>
+        <label>MusicXML 转 MIDI 命令模板</label>
+        <input id="converterCommand" type="text" placeholder="可选：把 {musicxml} 转成 {midi}">
+        <label>PianoBooster 命令模板</label>
         <input id="pianoCommand" type="text" placeholder="C:/.../pianobooster.exe \"{midi}\"">
-        <label>VMPK command template</label>
+        <label>VMPK 命令模板</label>
         <input id="vmpkCommand" type="text" placeholder="C:/.../vmpk.exe">
         <div class="row">
-          <button id="saveConfig" class="secondary">Save Local Template</button>
-          <button id="reloadState" class="secondary">Refresh State</button>
+          <button id="saveConfig" class="secondary">保存到浏览器</button>
+          <button id="reloadState" class="secondary">刷新状态</button>
         </div>
         <div class="status" id="configStatus"></div>
       </div>
     </div>
     <div class="grid" style="margin-top: 20px;">
       <div class="card">
-        <h2>Result</h2>
+        <h2>识别结果</h2>
         <div class="row">
-          <a id="openPiano" class="btn secondary" href="#" style="display:none;">Open PianoBooster</a>
-          <a id="openVmpk" class="btn secondary" href="#" style="display:none;">Open VMPK</a>
-          <a id="openMusicXml" class="btn secondary" href="#" style="display:none;">Open MusicXML</a>
+          <a id="openPiano" class="btn secondary" href="#" style="display:none;">打开 PianoBooster</a>
+          <a id="openVmpk" class="btn secondary" href="#" style="display:none;">打开 VMPK</a>
+          <a id="openMusicXml" class="btn secondary" href="#" style="display:none;">打开 MusicXML</a>
         </div>
-        <pre id="resultBox">No run yet.</pre>
+        <pre id="resultBox">还没有运行。</pre>
       </div>
       <div class="card">
-        <h2>State</h2>
+        <h2>当前状态</h2>
         <pre id="stateBox">Loading...</pre>
       </div>
     </div>
@@ -334,13 +340,13 @@ HTML_PAGE = """<!doctype html>
       lastImageData = dataUrl;
       preview.src = dataUrl;
       preview.style.display = 'block';
-      captureStatus.textContent = 'Image ready.';
+      captureStatus.textContent = '图片已准备好。';
     }
 
     async function startCamera() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
       video.srcObject = stream;
-      captureStatus.textContent = 'Camera ready.';
+      captureStatus.textContent = '摄像头已就绪。';
     }
 
     async function fileToDataUrl(file) {
@@ -357,7 +363,7 @@ HTML_PAGE = """<!doctype html>
     };
 
     document.getElementById('capture').onclick = async () => {
-      if (!video.srcObject) { captureStatus.textContent = 'Start the camera first.'; return; }
+      if (!video.srcObject) { captureStatus.textContent = '请先启动摄像头。'; return; }
       canvas.width = video.videoWidth || 1280;
       canvas.height = video.videoHeight || 720;
       const ctx = canvas.getContext('2d');
@@ -390,7 +396,7 @@ HTML_PAGE = """<!doctype html>
     document.getElementById('saveConfig').onclick = () => {
       localTemplate = readTemplatesFromFields();
       localStorage.setItem('msr.templates', JSON.stringify(localTemplate));
-      configStatus.innerHTML = '<span class="ok">Saved in browser local storage.</span>';
+      configStatus.innerHTML = '<span class="ok">已保存到浏览器本地存储。</span>';
       refreshState();
     };
 
@@ -399,11 +405,20 @@ HTML_PAGE = """<!doctype html>
       const data = await response.json();
       stateBox.textContent = JSON.stringify(data, null, 2);
       configStatus.innerHTML = [
-        data.config.audiveris_command ? '<span class="ok">Audiveris configured</span>' : '<span class="warn">Audiveris not configured</span>',
-        data.config.musicxml_to_midi_command ? '<span class="ok">Converter configured</span>' : '<span class="warn">Converter optional</span>',
-        data.config.pianobooster_command ? '<span class="ok">PianoBooster configured</span>' : '<span class="warn">PianoBooster not configured</span>',
-        data.config.vmpk_command ? '<span class="ok">VMPK configured</span>' : '<span class="warn">VMPK not configured</span>',
+        data.config.audiveris_command ? '<span class="ok">Audiveris 已配置</span>' : '<span class="warn">Audiveris 未配置</span>',
+        data.config.musicxml_to_midi_command ? '<span class="ok">转换器已配置</span>' : '<span class="warn">转换器可选</span>',
+        data.config.pianobooster_command ? '<span class="ok">PianoBooster 已配置</span>' : '<span class="warn">PianoBooster 未配置</span>',
+        data.config.vmpk_command ? '<span class="ok">VMPK 已配置</span>' : '<span class="warn">VMPK 未配置</span>',
       ].join('<br>');
+      var hasLocal = Object.values(localTemplate).some(function(v) { return v && v.trim(); });
+      if (!hasLocal && data.templates) {
+        var t = data.templates;
+        if (t.audiveris && !document.getElementById('audiverisCommand').value) document.getElementById('audiverisCommand').value = t.audiveris;
+        if (t.converter && !document.getElementById('converterCommand').value) document.getElementById('converterCommand').value = t.converter;
+        if (t.pianobooster && !document.getElementById('pianoCommand').value) document.getElementById('pianoCommand').value = t.pianobooster;
+        if (t.vmpk && !document.getElementById('vmpkCommand').value) document.getElementById('vmpkCommand').value = t.vmpk;
+      }
+      return data;
     }
 
     async function openTarget(target) {
@@ -417,14 +432,14 @@ HTML_PAGE = """<!doctype html>
     }
 
     document.getElementById('run').onclick = async () => {
-      if (!lastImageData) { captureStatus.textContent = 'Pick or capture an image first.'; return; }
+      if (!lastImageData) { captureStatus.textContent = '请先拍照或上传图片。'; return; }
       localTemplate = readTemplatesFromFields();
       localStorage.setItem('msr.templates', JSON.stringify(localTemplate));
       const payload = {
         image: lastImageData,
         localTemplates: localTemplate,
       };
-      captureStatus.textContent = 'Running recognition...';
+      captureStatus.textContent = '正在识别...';
       const response = await fetch('/api/recognize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -442,7 +457,7 @@ HTML_PAGE = """<!doctype html>
       }
       openVmpk.style.display = 'inline-block';
       openVmpk.onclick = () => openTarget('vmpk');
-      captureStatus.textContent = data.midi_path ? 'Done. MIDI is ready.' : 'Done. Check MusicXML output.';
+      captureStatus.textContent = data.midi_path ? '完成，MIDI 已就绪。' : '完成，请检查 MusicXML 输出。';
       await refreshState();
     };
 
@@ -452,7 +467,6 @@ HTML_PAGE = """<!doctype html>
 
     document.getElementById('reloadState').onclick = refreshState;
 
-    fillTemplatesFromStorage();
     refreshState();
   </script>
 </body>
@@ -501,14 +515,17 @@ class Handler(BaseHTTPRequestHandler):
                 with STATE.lock:
                     if isinstance(payload.get("localTemplates"), dict):
                         for key, value in payload["localTemplates"].items():
+                            val = (str(value) or "").strip()
+                            if not val:
+                                continue
                             if key == "audiverisCommand":
-                                STATE.config["audiveris_command"] = value
+                                STATE.config["audiveris_command"] = val
                             elif key == "converterCommand":
-                                STATE.config["musicxml_to_midi_command"] = value
+                                STATE.config["musicxml_to_midi_command"] = val
                             elif key == "pianoCommand":
-                                STATE.config["pianobooster_command"] = value
+                                STATE.config["pianobooster_command"] = val
                             elif key == "vmpkCommand":
-                                STATE.config["vmpk_command"] = value
+                                STATE.config["vmpk_command"] = val
                 result = recognize_image(image)
                 self._send_json(result)
             except Exception as exc:

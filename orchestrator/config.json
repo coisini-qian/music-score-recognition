@@ -1,0 +1,9 @@
+{
+  "host": "127.0.0.1",
+  "port": 8765,
+  "work_dir": "",
+  "audiveris_command": "\"D:/music-score-recognition/Audiveris/Audiveris.exe\" -batch -export -output \"{output}\" \"{input}\"",
+  "musicxml_to_midi_command": "python \"D:/music-score-recognition/orchestrator/convert_mxl.py\" \"{musicxml}\" \"{midi}\"",
+  "pianobooster_command": "\"D:/music-score-recognition/Piano Booster/pianobooster.exe\" \"{midi}\"",
+  "vmpk_command": "\"D:/music-score-recognition/VMPK/vmpk.exe\""
+}
