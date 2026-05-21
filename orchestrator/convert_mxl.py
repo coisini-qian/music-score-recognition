@@ -113,7 +113,7 @@ def build_midi(parts: list[dict]) -> bytes:
     ticks_per_beat = 480
 
     # Header chunk
-    header_data = struct.pack(">HHH", 1, len(parts), ticks_per_beat)
+    header_data = struct.pack(">HHH", 1, len(parts) + 1, ticks_per_beat)
     write_midi_chunk(output, b"MThd", header_data)
 
     # Tempo track
