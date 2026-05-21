@@ -29,3 +29,4 @@ The new integration layer lives in `orchestrator/`.
 Audiveris exports MusicXML by design. MIDI generation is handled here as an optional
 conversion step, so the converter command must be configured if you want PianoBooster to
 open a MIDI file automatically.
+本项目已在 Windows 11 环境下完成本地部署与功能测试。
